@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treinamento App Contele Teams</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --blue-primary: #2563EB;
+            --blue-primary-hover: #1D4ED8;
+            --blue-secondary: #0F172A;
+            --blue-light: #EFF6FF;
+            --bg-page: #F8FAFC;
+            --card-border: #E2E8F0;
+            --sidebar-width: 280px;
+            
+            /* Cores Roadmap */
+            --c-inicio: #8B5CF6;
+            --c-antes: #F59E0B;
+            --c-cadastrando: #3B82F6;
+            --c-execucao: #10B981;
+            --c-gastos: #EF4444;
+            --c-menu: #64748B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--blue-secondary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100%;
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);
+            color: white;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+
+        .sidebar-title { 
+            font-size: 14px; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            text-align: center; 
+            text-transform: uppercase; 
+            color: #94A3B8; 
+        }
+
+        .index-list { list-style: none; flex: 1; }
+        .index-item { 
+            padding: 12px 14px; 
+            margin-bottom: 4px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 13px; 
+            font-weight: 500; 
+            transition: all 0.2s; 
+            color: #CBD5E1; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        .index-item:hover { background: rgba(255,255,255,0.08); color: white; }
+        .index-item.active-nav { background: var(--blue-primary); color: white; font-weight: 600; }
+
+        /* Área Principal */
+        #presentation-container { 
+            width: calc(100% - var(--sidebar-width)); 
+            height: 100%; 
+            position: relative; 
+            background-image: radial-gradient(#CBD5E1 1px, transparent 1px); 
+            background-size: 30px 30px; 
+        }
+
+        .slide {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            padding: 40px 50px 90px 50px; opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease;
+            display: flex; flex-direction: column;
+        }
+        .slide.active { opacity: 1; visibility: visible; }
+
+        /* Capa */
+        .slide-cover { justify-content: center; align-items: center; text-align: center; background: white; padding-bottom: 40px; }
+        .logo-cover { width: 320px; margin-bottom: 30px; }
+        .slide-cover h1 { font-size: 48px; font-weight: 800; color: var(--blue-secondary); margin-bottom: 10px; }
+        .slide-cover p { font-size: 20px; color: #64748B; }
+
+        /* Cabeçalho Slides Internos */
+        .logo-mini { position: absolute; top: 30px; right: 50px; width: 120px; }
+        h2 { font-size: 28px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+        h2::before { content: ''; width: 6px; height: 30px; background: var(--blue-primary); border-radius: 3px; }
+
+        /* Grid de Itens Expansivo */
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            flex: 1;
+        }
+
+        /* Slide 4 Especial (16 itens) para caber sem scroll */
+        .grid-4x4 {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .item-card {
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        .item-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1; /* Faz o conteúdo empurrar o botão para baixo */
+        }
+        .item-info h4 { font-size: 16px; font-weight: 700; color: var(--blue-secondary); line-height: 1.3;}
+        .item-info p { font-size: 14px; color: #475569; line-height: 1.5; }
+        
+        .video-link {
+            margin-top: 16px;
+            align-self: flex-start;
+            background: var(--blue-light);
+            color: var(--blue-primary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .video-link:hover { background: var(--blue-primary); color: white; }
+
+        /* Ajustes específicos para o grid 4x4 (Módulo 4) para caber na tela */
+        .grid-4x4 .item-card { padding: 12px; }
+        .grid-4x4 .item-info { gap: 6px; }
+        .grid-4x4 .item-info h4 { font-size: 13px; }
+        .grid-4x4 .item-info p { font-size: 11.5px; line-height: 1.35; }
+        .grid-4x4 .video-link { margin-top: 8px; font-size: 11px; padding: 5px 10px; }
+
+        /* Roadmap Geral */
+        .roadmap {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; flex: 1; padding: 10px 0;
+            align-content: stretch;
+        }
+        .roadmap-node {
+            background: white; border: 1px solid var(--card-border); border-radius: 16px; padding: 30px;
+            display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px;
+            justify-content: center;
+        }
+        .roadmap-node i { font-size: 40px; }
+        .roadmap-node h3 { font-size: 20px; font-weight: 700; }
+        .roadmap-node p { font-size: 15px; color: #475569; line-height: 1.5; }
+
+        /* Controles */
+        .controls { position: absolute; bottom: 30px; right: 50px; display: flex; gap: 12px; }
+        .btn { 
+            padding: 12px 24px; border-radius: 50px; border: 1px solid var(--card-border); 
+            background: white; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: all 0.2s;
+        }
+        .btn:hover:not(:disabled) { background: var(--blue-primary); color: white; border-color: var(--blue-primary); transform: translateY(-2px);}
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none;}
+
+    </style>
+</head>
+<body>
+
+    <aside id="sidebar">
+        <div class="sidebar-title">Conteúdo</div>
+        <ul class="index-list">
+            <li class="index-item active-nav" onclick="goToSlide(0)"><i class="fa-solid fa-house"></i> Início</li>
+            <li class="index-item" onclick="goToSlide(1)"><i class="fa-solid fa-route"></i> Visão Geral</li>
+            <li class="index-item" onclick="goToSlide(2)"><i class="fa-solid fa-play"></i> 1. Início</li>
+            <li class="index-item" onclick="goToSlide(3)"><i class="fa-solid fa-calendar-day"></i> 2. Antes da Visita</li>
+            <li class="index-item" onclick="goToSlide(4)"><i class="fa-solid fa-building"></i> 3. Locais</li>
+            <li class="index-item" onclick="goToSlide(5)"><i class="fa-solid fa-briefcase"></i> 4. Execução</li>
+            <li class="index-item" onclick="goToSlide(6)"><i class="fa-solid fa-dollar-sign"></i> 5. Despesas</li>
+            <li class="index-item" onclick="goToSlide(7)"><i class="fa-solid fa-bars"></i> 6. Menu</li>
+        </ul>
+    </aside>
+
+    <main id="presentation-container">
+        
+        <div class="slide slide-cover active" id="slide-0">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-cover" alt="Contele Teams">
+            <h1>Treinamento App</h1>
+            <p>Guia Completo de Operação Contele Teams</p>
+        </div>
+
+        <div class="slide" id="slide-1">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>Visão Geral do Fluxo</h2>
+            <div class="roadmap">
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-inicio)">
+                    <i class="fa-solid fa-right-to-bracket" style="color: var(--c-inicio)"></i>
+                    <h3>1. Início</h3>
+                    <p>Acesso, login e permissões iniciais do sistema para configuração do aplicativo.</p>
+                </div>
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-antes)">
+                    <i class="fa-solid fa-map-location-dot" style="color: var(--c-antes)"></i>
+                    <h3>2. Antes da Visita</h3>
+                    <p>Planejamento de rotas, configuração de partida/chegada e organização da agenda.</p>
+                </div>
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-cadastrando)">
+                    <i class="fa-solid fa-plus-square" style="color: var(--c-cadastrando)"></i>
+                    <h3>3. Locais</h3>
+                    <p>Gestão de endereços, histórico de visitas e prospecção de novos clientes próximos.</p>
+                </div>
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-execucao)">
+                    <i class="fa-solid fa-check-circle" style="color: var(--c-execucao)"></i>
+                    <h3>4. Execução</h3>
+                    <p>Check-in, preenchimento de formulários, fotos, relatórios e assinaturas digitais.</p>
+                </div>
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-gastos)">
+                    <i class="fa-solid fa-receipt" style="color: var(--c-gastos)"></i>
+                    <h3>5. Despesas</h3>
+                    <p>Lançamento de gastos, inclusão de comprovantes e controle de itens reembolsáveis.</p>
+                </div>
+                <div class="roadmap-node" style="border-top: 6px solid var(--c-menu)">
+                    <i class="fa-solid fa-gears" style="color: var(--c-menu)"></i>
+                    <h3>6. Menu</h3>
+                    <p>Sincronização de dados, ativação do Dark Mode, versão do app e suporte técnico.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-2">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>1. Início</h2>
+            <div class="compact-grid">
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>1.1 Visão Geral do App</h4>
+                        <p>O Contele Teams possui abas para Visitas, Locais, Gastos e Notificações, permitindo criar compromissos e cadastrar locais e gastos com filtros de busca. O Google Maps facilita o planejamento e as configurações otimizam a rotina no campo.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=CpFNMNTMhJ0" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>1.2 Login e Esqueci minha senha</h4>
+                        <p>Para acessar o Contele Teams, insira seu e-mail, senha e aceite os termos de uso. Se esquecer a senha, informe seu e-mail e escolha o link de recuperação por WhatsApp ou e-mail. Após redefinir, o acesso será liberado.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=LCXs7Dn6CuI" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>1.3 Como fazer o Logout</h4>
+                        <p>Para fazer o logout no aplicativo, basta acessar o menu superior esquerdo e clicar na opção "Sair", que está destacada em vermelho. Assim que você clicar, o logout será realizado com segurança.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=ISOm2xbx2rE" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>1.4 Baixar dados e Liberar Permissões</h4>
+                        <p>No primeiro acesso, insira login e senha, aceite os termos e permita todas as permissões, especialmente a localização em segundo plano. Após a sincronização dos dados, toque em "Concluir" para usar o app.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=k1NSOj2jfGw" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-3">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>2. Antes da Visita</h2>
+            <div class="compact-grid">
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>2.1 Ponto de partida e chegada na agenda</h4>
+                        <p>No Contele Teams, o ponto de partida é onde a rota começa a ser contabilizada (ex: casa). O ponto de chegada é o último local, calculando o deslocamento final. O sistema registra esses pontos para calcular a rota e o reembolso.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=TjFy7J2h7sM" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>2.2 Partida e Chegada no primeiro check-in</h4>
+                        <p>Dependendo da configuração, o ponto de partida é o primeiro check-in e o ponto de chegada é o último check-out. A rota entre esses pontos será calculada para o reembolso de quilometragem.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=QoTy_nz2XvQ" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>2.3 Melhor Rota e Ver no Google Maps</h4>
+                        <p>Para otimizar deslocamentos, use a opção de calcular a melhor rota, que reorganiza a sequência das visitas para uma rota mais eficiente. O Google Maps exibirá um trajeto simplificado, economizando tempo e recursos.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=sZl5WBvVhzo" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>2.4 Sua Agenda e Filtros</h4>
+                        <p>Acompanhe sua agenda diária, com navegação por dias passados e futuros. Filtros por proximidade, cidade, categoria, etiqueta e status ajudam a otimizar a visualização e facilitam a organização em dias lotados.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=I7GaTDwdXkI" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>2.5 Seus Locais e Filtros</h4>
+                        <p>Acesse a lista de clientes cadastrados, com dados como endereço, CNPJ, telefone, e-mail e histórico de visitas. Filtros por proximidade e categoria ajudam na busca rápida dentro da sua carteira de clientes.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=6bElwbYu9rM" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-4">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>3. Cadastrando Locais</h2>
+            <div class="compact-grid">
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>3.1 Adicionar/Cadastrar Local com GPS</h4>
+                        <p>Vá até a aba Locais e toque em “+”. O app tentará identificar o endereço via GPS. Preencha os dados complementares, como nome, categoria, CNPJ, telefone e e-mail. Após salvar, o local fica disponível na sua lista.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=G1zLemNwNnw" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>3.2 Ver histórico de visitas no Local</h4>
+                        <p>Acesse a agenda ou o local e selecione "Histórico de visitas". Você pode ver as datas das visitas anteriores, detalhes de check-in, check-out, visualizar fotos e acessar as discussões registradas pelos técnicos.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=OGN44hVG45g" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>3.3 Ver histórico de gastos no Local</h4>
+                        <p>Consulte o histórico de gastos de um cliente antes da visita. Ao acessar o cadastro, você vê despesas anteriores, como refeições ou custos extras, permitindo que você entre na visita ciente dessas informações.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=z-kUsWA74mU" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>3.4 Editar e apagar Local</h4>
+                        <p>Locais criados por você podem ser modificados livremente no ícone do lápis ou apagados na lixeira. Locais importados pela empresa dependem de permissão do gestor para serem alterados ou removidos.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=rnmOstijE7Y" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>3.5 Como prospectar (Meus locais próximos)</h4>
+                        <p>Use o recurso para identificar clientes ao redor e agendar visitas no deslocamento. Acesse Filtros, selecione Locais Próximos e defina um raio (ex: 2 km). O sistema listará clientes próximos para você adicionar à agenda.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=LZf7c7k7GSk" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-5">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2 style="margin-bottom: 15px;">4. Execução da Visita</h2>
+            <div class="compact-grid grid-4x4">
+                <div class="item-card">
+                    <div class="item-info"><h4>4.1 Agendar visita</h4><p>Escolha um local, defina a data, horário, adicione etiquetas, observações e indique se terá reembolso.</p></div>
+                    <a href="https://www.youtube.com/watch?v=bo8qKNc1Z24" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.2 Editar agendada</h4><p>Selecione o compromisso, toque no lápis e altere a data, horário, etiquetas ou ajuste a instrução.</p></div>
+                    <a href="https://www.youtube.com/watch?v=ra6hrbWfqxg" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.3 Recusar visita</h4><p>Toque nos três pontinhos, selecione "Recusar visita", informe o motivo e confirme para manter o controle.</p></div>
+                    <a href="https://www.youtube.com/watch?v=LezfmlFBvlA" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.4 Visão Geral</h4><p>Inicie com Check-in, registre formulários/fotos, cliente assina digitalmente e finalize com Check-out.</p></div>
+                    <a href="https://www.youtube.com/watch?v=mxdZ5lVAsDk" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.5 Visualizar a rota</h4><p>Clique no ícone de mapa e o app abrirá o Google Maps mostrando o tempo estimado de deslocamento.</p></div>
+                    <a href="https://www.youtube.com/watch?v=PL6ZBU5rk-A" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.6 Estou a Caminho</h4><p>Envie automaticamente uma mensagem via WhatsApp ou e-mail com horário e distância até a chegada.</p></div>
+                    <a href="https://www.youtube.com/watch?v=mn_NH0yI1OA" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.7 Não contabilizar</h4><p>Desmarque a opção "Contabilizar trajeto" ao agendar para impedir que a quilometragem gere reembolso.</p></div>
+                    <a href="https://www.youtube.com/watch?v=ReAA_pFotuo" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.8 Preencher Form.</h4><p>Campos obrigatórios com asterisco devem ser preenchidos para não bloquear o avanço no check-out.</p></div>
+                    <a href="https://www.youtube.com/watch?v=y9_njTQYcPY" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.9 Tipos de Questões</h4><p>Há questões de escolha única, checklist, anexos, localização e assinatura. O sistema valida os dados inseridos.</p></div>
+                    <a href="https://www.youtube.com/watch?v=pHDy96Lp_H0" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.10 Assinatura</h4><p>A assinatura do cliente impede edição posterior. Colaboradores também podem assinar dentro dos formulários.</p></div>
+                    <a href="https://www.youtube.com/watch?v=UPmk6Pz01O0" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.11 Gravar Vídeo</h4><p>Grave ou importe vídeos na tela principal após o check-in ou dentro de um formulário para documentar.</p></div>
+                    <a href="https://www.youtube.com/watch?v=QzfbFWp-14Q" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.12 Reagendar</h4><p>Ajuste data e horário no ícone do lápis. A visita será atualizada e reorganizada na nova data na sua agenda.</p></div>
+                    <a href="https://www.youtube.com/watch?v=UgMGLQj8_2o" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.13 Etiquetas</h4><p>Use etiquetas para identificar status, como "Primeira Visita", ou marcar produtos e observações durante a visita.</p></div>
+                    <a href="https://www.youtube.com/watch?v=qUo2_l-8fFA" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.14 Produtos</h4><p>Acesse os itens e confirme a movimentação ao entregar ao cliente, transferindo a posse e esvaziando o estoque.</p></div>
+                    <a href="https://www.youtube.com/watch?v=DS-1M0fBYyo" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.15 Relatório</h4><p>O relatório inclui detalhes de horários, check-in, check-out, fotos, formulários respondidos e a assinatura.</p></div>
+                    <a href="https://www.youtube.com/watch?v=iaFkwsbwvrI" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info"><h4>4.16 Cliente visualizar</h4><p>Toque no ícone de compartilhamento, escolha WhatsApp ou e-mail e envie o link para o cliente acompanhar.</p></div>
+                    <a href="https://www.youtube.com/watch?v=iX_vQNtbX7o" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Link</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-6">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>5. Registro de Despesas</h2>
+            <div class="compact-grid">
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>5.1 Visão Geral de Gastos e Filtros</h4>
+                        <p>Acessado pelo ícone de cifrão, permite consultar e registrar despesas. É possível navegar por datas e vincular gastos a uma visita, marcando-os como reembolsáveis. Filtros por tipo, status, local ou visita facilitam a busca.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=v0keFZXKalA" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>5.2 Como cadastrar um novo gasto</h4>
+                        <p>Toque no botão “+”, insira o valor, ajuste a data e preencha a descrição. Indique se o gasto é reembolsável e vincule a uma visita. Adicione a foto do comprovante e, após aprovação, o status mudará no aplicativo.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=arO1YqFqO6U" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>5.3 Como editar e excluir um gasto</h4>
+                        <p>Vá até a aba Gastos, selecione o item e toque no lápis para alterar valor, data, motivo ou substituir o comprovante. Para excluir, toque nos três pontinhos no canto superior direito e selecione a exclusão do registro.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=j1tgG7c0dBI" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide" id="slide-7">
+            <img src="https://i.ibb.co/YFRS0XGF/oie-transparent.png" class="logo-mini">
+            <h2>6. Menu</h2>
+            <div class="compact-grid">
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>6.1 Alterar para "Darkmode"</h4>
+                        <p>Vá até o canto superior esquerdo e toque no ícone da lua para ativar o modo escuro no aplicativo, oferecendo maior conforto visual. Para voltar ao modo claro, basta clicar no ícone do sol.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=Qe2YZ5lmbvE" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>6.2 Sincronização</h4>
+                        <p>No menu esquerdo, clique em "Sincronizar" para enviar e receber dados pendentes com o servidor, ou utilize "Baixar dados" para forçar a atualização completa dos itens da plataforma para o seu aplicativo.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=3g1AvfQYGNU" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>6.3 Configurar permissões</h4>
+                        <p>Ao acessar, você precisa liberar armazenamento, câmera, microfone e localização. Se algum recurso fundamental for bloqueado acidentalmente, o aplicativo emitirá um alerta exigindo a correção nas configurações do celular.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=HctPNGbOsYs" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>6.4 Solicitar ajuda ou suporte</h4>
+                        <p>No canto superior esquerdo, toque no ícone de ajuda. Isso abrirá uma janela que o levará diretamente para o WhatsApp, conectando você à equipe de suporte oficial do Contele para tirar suas dúvidas de forma rápida.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=YMIqwvT3H3I" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+                <div class="item-card">
+                    <div class="item-info">
+                        <h4>6.5 Novidades e Versão do App</h4>
+                        <p>Verifique a versão instalada na parte inferior do menu. Clique em "Novidades" com o filtro acionado para acompanhar lançamentos de novas funcionalidades diretamente da tela de atualizações.</p>
+                    </div>
+                    <a href="https://www.youtube.com/watch?v=CrRU-tN2t00" target="_blank" class="video-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Vídeo</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="prevSlide()" disabled><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+            <button class="btn" id="nextBtn" onclick="nextSlide()">Próximo <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+    </main>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const indexItems = document.querySelectorAll('.index-item');
+
+        function updateUI() {
+            slides.forEach((s, i) => s.classList.toggle('active', i === currentSlide));
+            indexItems.forEach((item, i) => item.classList.toggle('active-nav', i === currentSlide));
+            
+            prevBtn.disabled = (currentSlide === 0);
+            nextBtn.disabled = (currentSlide === totalSlides - 1);
+        }
+
+        function nextSlide() { if (currentSlide < totalSlides - 1) { currentSlide++; updateUI(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; updateUI(); } }
+        function goToSlide(n) { currentSlide = n; updateUI(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
